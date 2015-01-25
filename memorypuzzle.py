@@ -46,20 +46,60 @@ def main():
     pygame.init()
     FPSCLOCK = pygame.time.Clock()
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
-    pygame.display.set_caption('Coderdojo Memory  Game')
-    
-    mainBoard = []
-    mainBoard.append( [ (DONUT,RED),(DONUT,RED) ] )
-    mainBoard.append( [ (SQUARE,GREEN),(SQUARE,GREEN) ])
-    revealedBoxes = []
-    revealedBoxes.append( [False, False] )
-    revealedBoxes.append( [False, False] )
-    
+
+    pygame.display.set_caption('Coderdojo Memory Game')
+
+    mainBoard = getRandomizedBoard()
+    revealedBoxes = generateRevealedBoxesData(False)
+
+    firstSelection = None # stores the (x, y) of the first box clicked.
+
     DISPLAYSURF.fill(BGCOLOR)
-    pygame.display.update()
-    pygame.time.wait(4000)
-    pygame.quit()
-    sys.exit()
+
+    while True: # main game loop
+
+        DISPLAYSURF.fill(BGCOLOR) # drawing the window
+#        drawBoard(mainBoard, revealedBoxes)
+
+        for event in pygame.event.get(): # event handling loop
+            if event.type == QUIT or (event.type == KEYUP and event.key == K_ESCAPE):
+                pygame.quit()
+                sys.exit()
+
+        # Redraw the screen and wait a clock tick.
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+
+
+def generateRevealedBoxesData(val):
+    revealedBoxes = []
+    for i in range(BOARDWIDTH):
+        revealedBoxes.append([val] * BOARDHEIGHT)
+    return revealedBoxes
+
+
+def getRandomizedBoard():
+    # Get a list of every possible shape in every possible color.
+    icons = []
+    for color in ALLCOLORS:
+        for shape in ALLSHAPES:
+            icons.append( (shape, color) )
+
+    random.shuffle(icons) # randomize the order of the icons list
+    numIconsUsed = int(BOARDWIDTH * BOARDHEIGHT / 2) # calculate how many icons are needed
+    icons = icons[:numIconsUsed] * 2 # make two of each
+    random.shuffle(icons)
+
+    # Create the board data structure, with randomly placed icons.
+    board = []
+    for x in range(BOARDWIDTH):
+        column = []
+        for y in range(BOARDHEIGHT):
+            column.append(icons[0])
+            del icons[0] # remove the icons as we assign them
+        board.append(column)
+    return board
+
 
 if __name__ == '__main__':
     main()
